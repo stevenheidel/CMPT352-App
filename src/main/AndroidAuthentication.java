@@ -48,9 +48,9 @@ public class AndroidAuthentication extends Activity {
 		CharSequence csUUID = Secure.getString(getBaseContext().getContentResolver(), Secure.ANDROID_ID);
 		// This csAuthString will eventually be an encrypted string
 		// of some length. For prototype purposes it's in plaintext.
-		csAuthString = "UUID:" + csUUID.toString() + 
-									"IMEI:" + csIMEI.toString() + 
-									"PHONENUM:" + csPhoneNo.toString();
+		csAuthString = "UUID=" + csUUID.toString() + "&" +
+									"IMEI=" + csIMEI.toString() + "&" +
+									"PN=" + csPhoneNo.toString();
 		
 		// Button to launch the ZXing scanner
 		Button button = (Button) findViewById(main.namespace.R.id.android_button);
