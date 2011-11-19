@@ -1,0 +1,4 @@
+This is the entire project folder for our project that you can import into Eclipse. Source files
+are in the src/main folder and com/google/zxing/integration/android is where the ZXing library lives
+along with Google's authentication generator. The GUI Layout files are in res/layout and the menu is
+in res/menu.
