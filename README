@@ -2,3 +2,6 @@ This is the entire project folder for our project that you can import into Eclip
 are in the src/main folder and com/google/zxing/integration/android is where the ZXing library lives
 along with Google's authentication generator. The GUI Layout files are in res/layout and the menu is
 in res/menu.
+
+You can also grab the .apk file for the app from the bin/res/ directory(AndroidAuthentication.apk) 
+and run it on your phone or an emulator.
