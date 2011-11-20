@@ -1,6 +1,7 @@
 package main;
 
 import java.io.IOException;
+import java.util.Date;
 
 import org.apache.http.HttpHost;
 import org.apache.http.client.ClientProtocolException;
@@ -164,12 +165,16 @@ public class AndroidAuthentication extends Activity {
 	private String GenerateAuthString(){
 		// Retrieving the Android UUID
 		TelephonyManager tManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+		Date newDate = new Date();
+		// A six digit time code which is approximately a 5 minute
+		// interval(adding 1 adds ~5 mins)
+		long time = ((newDate.getTime() / 100000) % 100000);
 
 		// Setting the phone number, IMEI, and UUID into variables
 		csPhoneNo = tManager.getLine1Number();
 		csIMEI = tManager.getDeviceId();
 		csUUID = Secure.getString(getBaseContext().getContentResolver(), Secure.ANDROID_ID);
-		csAuthCode = "123456";
+		csAuthCode = Long.toString(time);
 		
 		// This csAuthString will eventually be an encrypted string
 		// of some length. For prototype purposes it's in plaintext.
