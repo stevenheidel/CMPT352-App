@@ -31,49 +31,27 @@ import android.provider.Settings.Secure;
 
 public class AndroidAuthentication extends Activity {
 
-	CharSequence csAuthString = "";
+	final int QR_SCAN = 0;
+	final int SETTINGS = 1;
+	
+	private CharSequence csAuthString = "";
+	private CharSequence csUsername = "";
+	private CharSequence csPassword = "";
+	private CharSequence csPhoneNo = "";
+	private CharSequence csIMEI = "";
+	private CharSequence csUUID = "";
+	private CharSequence csAuthCode = "";
 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(main.namespace.R.layout.main);
-
-		// Retrieving the Android UUID
-		TelephonyManager tManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-
-		// Setting the phone number, IMEI, and UUID into variables
-		CharSequence csPhoneNo = tManager.getLine1Number();
-		CharSequence csIMEI = tManager.getDeviceId();
-		CharSequence csUUID = Secure.getString(getBaseContext().getContentResolver(), Secure.ANDROID_ID);
-		// This csAuthString will eventually be an encrypted string
-		// of some length. For prototype purposes it's in plaintext.
-		csAuthString = "UUID=" + csUUID.toString() + "&" +
-									"IMEI=" + csIMEI.toString() + "&" +
-									"PN=" + csPhoneNo.toString();
 		
 		// Button to launch the ZXing scanner
-		Button button = (Button) findViewById(main.namespace.R.id.android_button);
-
-		// To display the UUID
-		TextView txtUUID = (TextView) findViewById(main.namespace.R.id.txtUUIDTitle);
-		txtUUID.setId(InputType.TYPE_CLASS_TEXT);
-		txtUUID.append(csUUID);
-
-		// To display the IMEI
-		TextView txtIMEI = (TextView) findViewById(main.namespace.R.id.txtIMEI);
-		txtIMEI.setId(InputType.TYPE_CLASS_TEXT);
-		txtIMEI.append(csIMEI);
-
-		// To display the phone number
-		TextView txtPhoneNo = (TextView) findViewById(main.namespace.R.id.txtPhoneNo);
-		txtPhoneNo.setId(InputType.TYPE_CLASS_TEXT);
-		txtPhoneNo.append(csPhoneNo);
-		
-		// To display the Auth String
-		TextView txtAuthString = (TextView) findViewById(main.namespace.R.id.txtAuthString);
-		txtAuthString.setId(InputType.TYPE_CLASS_TEXT);
-		txtAuthString.append(csAuthString);
+		Button button = (Button) findViewById(main.namespace.R.id.launchQR);
+		// Button for generating the Auth String (for testing purposes not for release)
+		Button btnGenAuth = (Button) findViewById(main.namespace.R.id.btnGenAuth);
 
 		// Starts the ZXing scanning library which sends the user into the
 		// Barcode Scanner app.
@@ -81,6 +59,14 @@ public class AndroidAuthentication extends Activity {
 			public void onClick(View v) {
 				// Perform action on clicks
 				IntentIntegrator.initiateScan(AndroidAuthentication.this);
+			}
+		});
+		
+		// Generates the Auth String
+		btnGenAuth.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				// Perform action on clicks
+				csAuthCode = GenerateAuthString();
 			}
 		});
 	}
@@ -93,24 +79,38 @@ public class AndroidAuthentication extends Activity {
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		IntentResult result = IntentIntegrator.parseActivityResult(requestCode,
 				resultCode, intent);
-		if (result != null) {
+		if ((result != null && resultCode == RESULT_OK) && requestCode != SETTINGS) {
 			CharSequence csContent = result.getContents();
 			TextView text = (TextView) findViewById(main.namespace.R.id.txtqrResults);
 			text.setInputType(InputType.TYPE_CLASS_TEXT);
 			if (csContent.toString() != null) {
-				Toast.makeText(AndroidAuthentication.this, csContent.toString(), Toast.LENGTH_LONG).show();
+				Toast.makeText(AndroidAuthentication.this,
+						csContent.toString(), Toast.LENGTH_LONG).show();
 				text.setText(csContent);
-				SendAuth("login",csAuthString.toString());
-				Toast.makeText(AndroidAuthentication.this, csAuthString.toString(), Toast.LENGTH_LONG).show();
+				SendAuth("login", csAuthString.toString());
 
 			} else {
 				Toast.makeText(AndroidAuthentication.this,
 						"Failed to read QR Code or no code scanned!",
 						Toast.LENGTH_LONG).show();
 			}
+		} else {
+			Bundle intExtras = intent.getExtras();
+			if (intExtras != null) {
+				csUsername = intExtras.getString("Settings.username");
+				csPassword = intExtras.getString("Settings.password");
+			} else {
+				csUsername = "null";
+				csPassword = "null";
+			}
 		}
 	}
 
+
+
+	
+
+	
 	// Creates the menu which pops up when the user presses
 	// the Menu key on their phone. This is for navigating
 	// to the Register and About screens.
@@ -136,8 +136,8 @@ public class AndroidAuthentication extends Activity {
 			startActivity(intAbout);
 			return true;
 		case main.namespace.R.id.settings:
-			Intent intSettings = new Intent(getApplicationContext(), Settings.class);
-			startActivity(intSettings);
+			Intent intSettings = new Intent(this, Settings.class);
+			startActivityForResult(intSettings,SETTINGS);
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -162,6 +162,48 @@ public class AndroidAuthentication extends Activity {
 			e.printStackTrace();
 		}
 
+	}
+	
+	private String GenerateAuthString(){
+		// Retrieving the Android UUID
+		TelephonyManager tManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+
+		// Setting the phone number, IMEI, and UUID into variables
+		csPhoneNo = tManager.getLine1Number();
+		csIMEI = tManager.getDeviceId();
+		csUUID = Secure.getString(getBaseContext().getContentResolver(), Secure.ANDROID_ID);
+		csAuthCode = "123456";
+		
+		// This csAuthString will eventually be an encrypted string
+		// of some length. For prototype purposes it's in plaintext.
+		csAuthString = "UUID=" + csUUID.toString() + "&" +
+									"IMEI=" + csIMEI.toString() + "&" +
+									"PN=" + csPhoneNo.toString() + "&" +
+									"UN=" + csUsername.toString() + "&" + 
+									"PS=" + csPassword.toString() + "&" +
+									"AC=" + csAuthCode.toString();
+
+		// To display the UUID
+		TextView txtUUID = (TextView) findViewById(main.namespace.R.id.txtUUIDTitle);
+		txtUUID.setId(InputType.TYPE_CLASS_TEXT);
+		txtUUID.append(csUUID);
+
+		// To display the IMEI
+		TextView txtIMEI = (TextView) findViewById(main.namespace.R.id.txtIMEI);
+		txtIMEI.setId(InputType.TYPE_CLASS_TEXT);
+		txtIMEI.append(csIMEI);
+
+		// To display the phone number
+		TextView txtPhoneNo = (TextView) findViewById(main.namespace.R.id.txtPhoneNo);
+		txtPhoneNo.setId(InputType.TYPE_CLASS_TEXT);
+		txtPhoneNo.append(csPhoneNo);
+		
+		// To display the Auth String
+		TextView txtAuthString = (TextView) findViewById(main.namespace.R.id.txtAuthString);
+		txtAuthString.setId(InputType.TYPE_CLASS_TEXT);
+		txtAuthString.append(csAuthString);
+		
+		return csAuthString.toString();
 	}
 
 }
