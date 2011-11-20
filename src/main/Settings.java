@@ -22,12 +22,17 @@ public class Settings extends Activity {
 				// Perform action on clicks
 				Intent newIntent = new Intent();
 				
+				// Assign textviews to the appropriate textboxes so we can take values 
+				// out of them.
 				TextView tvUsername = (TextView) findViewById(main.namespace.R.id.tboxUsername);
 				TextView tvPassword = (TextView) findViewById(main.namespace.R.id.tboxPassword);
 				
+				// Put the textbox values into the activity Extras so we can pass them back
+				// to the main screen.
 				newIntent.putExtra("Settings.username", tvUsername.getText().toString().trim());
 				newIntent.putExtra("Settings.password", tvPassword.getText().toString());
 				
+				// Pass the itent back to the caller and signal that everything went OK
 				setResult(RESULT_OK, newIntent);
 				
 				Toast.makeText(Settings.this,"Username/Password Saved!",Toast.LENGTH_SHORT).show();

@@ -31,8 +31,8 @@ import android.provider.Settings.Secure;
 
 public class AndroidAuthentication extends Activity {
 
-	final int QR_SCAN = 0;
-	final int SETTINGS = 1;
+	final int SETTINGS = 0;
+	final int REGISTER = 1;
 	
 	private CharSequence csAuthString = "";
 	private CharSequence csUsername = "";
@@ -79,7 +79,7 @@ public class AndroidAuthentication extends Activity {
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		IntentResult result = IntentIntegrator.parseActivityResult(requestCode,
 				resultCode, intent);
-		if ((result != null && resultCode == RESULT_OK) && requestCode != SETTINGS) {
+		if ((result != null && resultCode == RESULT_OK) && requestCode == IntentIntegrator.REQUEST_CODE) {
 			CharSequence csContent = result.getContents();
 			TextView text = (TextView) findViewById(main.namespace.R.id.txtqrResults);
 			text.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -94,7 +94,7 @@ public class AndroidAuthentication extends Activity {
 						"Failed to read QR Code or no code scanned!",
 						Toast.LENGTH_LONG).show();
 			}
-		} else {
+		} else if ((result != null && resultCode == RESULT_OK) && requestCode == SETTINGS){
 			Bundle intExtras = intent.getExtras();
 			if (intExtras != null) {
 				csUsername = intExtras.getString("Settings.username");
@@ -103,13 +103,10 @@ public class AndroidAuthentication extends Activity {
 				csUsername = "null";
 				csPassword = "null";
 			}
+		} else if ((result != null && resultCode == RESULT_OK) && requestCode == REGISTER){
+			// Code for retrieving data from the Register screen
 		}
 	}
-
-
-
-	
-
 	
 	// Creates the menu which pops up when the user presses
 	// the Menu key on their phone. This is for navigating
@@ -201,7 +198,7 @@ public class AndroidAuthentication extends Activity {
 		// To display the Auth String
 		TextView txtAuthString = (TextView) findViewById(main.namespace.R.id.txtAuthString);
 		txtAuthString.setId(InputType.TYPE_CLASS_TEXT);
-		txtAuthString.append(csAuthString);
+		txtAuthString.setText("Auth String: " + csAuthString);
 		
 		return csAuthString.toString();
 	}
