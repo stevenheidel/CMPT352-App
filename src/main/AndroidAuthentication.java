@@ -166,8 +166,8 @@ public class AndroidAuthentication extends Activity {
 		// Retrieving the Android UUID
 		TelephonyManager tManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 		Date newDate = new Date();
-		// A six digit time code which is approximately a 5 minute
-		// interval(adding 1 adds ~5 mins)
+		// A six digit time code which is a 100 second
+		// interval
 		long time = ((newDate.getTime() / 100000) % 100000);
 
 		// Setting the phone number, IMEI, and UUID into variables
