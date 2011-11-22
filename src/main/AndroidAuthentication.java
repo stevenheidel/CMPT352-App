@@ -1,7 +1,13 @@
 package main;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.http.HttpHost;
 import org.apache.http.client.ClientProtocolException;
@@ -68,6 +74,18 @@ public class AndroidAuthentication extends Activity {
 			public void onClick(View v) {
 				// Perform action on clicks
 				csAuthCode = GenerateAuthString();
+				
+				try {
+					String authString = new String(Encrypt(csAuthCode.toString()));
+					// To display the Encrypted Auth String
+					TextView txtEncString = (TextView) findViewById(main.namespace.R.id.txtEncString);
+					txtEncString.setId(InputType.TYPE_CLASS_TEXT);
+					txtEncString.append(authString);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 			}
 		});
 	}
@@ -143,23 +161,27 @@ public class AndroidAuthentication extends Activity {
 	}
 	
 	// Function for sending the authentication string to
-	// the listening website. The type parameter is wheth it's
+	// the listening website. The type parameter is whether it's
 	// for registering the phone or for logging in(this may or
-	// may not get changed depending on how it gets implemented.
+	// may not change depending on how it gets implemented.
 	private void SendAuth(String type, String authString) {
 		HttpParams params = new BasicHttpParams();
 		params.setParameter("type", type);
 		HttpClient client = new DefaultHttpClient();
 		
-		try {
-			client.execute(new HttpHost("http://127.0.0.1"),new HttpPost(authString));
-			
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		if (type.equals("login")) {
+			try {
+				client.execute(new HttpHost(
+						"http://cmpt352server.appspot.com/cmpt352_server"),new HttpPost(authString));
 
+			} catch (ClientProtocolException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			
+		}
 	}
 	
 	private String GenerateAuthString(){
@@ -206,6 +228,32 @@ public class AndroidAuthentication extends Activity {
 		txtAuthString.setText("Auth String: " + csAuthString);
 		
 		return csAuthString.toString();
+	}
+	
+	// Encrypts the parameter string (will be the Auth String) with AES
+	// encryption and returns it as a byte array.
+	private byte[] Encrypt(String newString) throws Exception{
+		System.out.println("TEST Original: " + newString);
+		KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+		keyGen.init(128);
+		
+		SecretKey sKey = keyGen.generateKey();
+		SecretKeySpec sKeySpec = new SecretKeySpec(sKey.getEncoded(),"AES");
+		
+		Cipher cipher = Cipher.getInstance("AES");
+		cipher.init(Cipher.ENCRYPT_MODE, sKeySpec);
+		
+		byte[] encString = cipher.doFinal(newString.getBytes());
+		System.out.println("TEST Encrypted: " + encString.toString());
+		
+		// Decrypt it for testing purposes. Will be removed upon release/handin
+		cipher.init(Cipher.DECRYPT_MODE, sKeySpec);
+		byte[] original = cipher.doFinal(encString);
+		
+		String output = new String(original);
+		System.out.println("TEST Decrypted: " + output);
+
+		return encString;
 	}
 
 }
