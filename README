@@ -3,5 +3,28 @@ are in the src/main folder and com/google/zxing/integration/android is where the
 along with Google's authentication generator. The GUI Layout files are in res/layout and the menu is
 in res/menu.
 
-You can also grab the .apk file for the app from the bin/res/ directory(AndroidAuthentication.apk) 
-and run it on your phone or an emulator.
+---Status---
+-Outputs the contents of the scanned QR Code
+-Calculates a 6-digit time sensitive auth code to make each authentication request different
+  from the last one. It increments every 100 seconds.
+-Displays the UUID,IMEI,Phone Number, and the final 
+  Auth String(made up of: UUID,IMEI,PhoneNo,AuthCode,Username,Password)
+  when you press the Generate Auth String button.
+-Auth String is of the format: [section]=VALUE& (eg. AuthCode=123456&) for all components
+-Displays the encrypted version of the Auth String as well(shows up weird)
+-You can enter your username and password by going to Menu->Settings. If
+  this isn't done before setting the username/password it inputs a username/
+  password of "null".
+-Upon scanning the QR Code it sends an HTTP POST request to our server which
+  contains the encrypted Auth String, unix time code, and the type(login or register)
+  and grabs its response.
+
+
+---TODO---
+-Program crashes when you press the Generate Auth String twice. :\
+-Still need to handle Phone Registration(need Login API/method)
+-Add the unique URL to the SendAuth function so it sends the POST to the 
+  one-time page.
+-Have an option to remember your username/password and then save those values
+  to a file on the phones disk.
+-Probably more stuff...
