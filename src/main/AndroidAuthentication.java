@@ -110,7 +110,7 @@ public class AndroidAuthentication extends Activity {
 			if (csContent.toString() != null) {
 				Toast.makeText(AndroidAuthentication.this,csContent.toString(), Toast.LENGTH_LONG).show();
 				text.setText(csContent);
-				SendAuth("login", csAuthString.toString());
+				SendAuth("login", csAuthString.toString(),csContent.toString());
 				System.out.println("QR SECTION U/P: " + csUsername.toString() + " " + csPassword.toString());
 			} else {
 				Toast.makeText(AndroidAuthentication.this,"Failed to read QR Code or no code scanned!",Toast.LENGTH_LONG).show();
@@ -169,14 +169,14 @@ public class AndroidAuthentication extends Activity {
 	// the listening website. The type parameter is whether it's
 	// for registering the phone or for logging in(this may or
 	// may not change depending on how it gets implemented.
-	static void SendAuth(String type, String authString) {
+	static void SendAuth(String type, String authString,String url) {
 		Date newDate = new Date();
 //		HttpParams params = new BasicHttpParams();
 //		params.setParameter("type", type);
 		HttpClient client = new DefaultHttpClient();
 		// Used for testing POST requests very handy site @ http://www.posttestserver.com/
 		//HttpPost hPost = new HttpPost("http://205.196.210.187/post.php?dir=kevin");
-		HttpPost hPost = new HttpPost("http://209.85.145.141/cmpt352_server");
+		HttpPost hPost = new HttpPost(url);
 		
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
         nameValuePairs.add(new BasicNameValuePair("auth", authString));
