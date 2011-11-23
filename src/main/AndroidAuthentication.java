@@ -1,29 +1,32 @@
 package main;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
-
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
+import org.apache.http.message.BasicNameValuePair;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings.Secure;
+import android.telephony.TelephonyManager;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -32,9 +35,9 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.telephony.*;
-import android.text.InputType;
-import android.provider.Settings.Secure;
+
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 public class AndroidAuthentication extends Activity {
 
@@ -42,8 +45,8 @@ public class AndroidAuthentication extends Activity {
 	final int REGISTER = 1;
 	
 	private CharSequence csAuthString = "";
-	private CharSequence csUsername = "";
-	private CharSequence csPassword = "";
+	private CharSequence csUsername = "null";
+	private CharSequence csPassword = "null";
 	private CharSequence csPhoneNo = "";
 	private CharSequence csIMEI = "";
 	private CharSequence csUUID = "";
@@ -80,7 +83,10 @@ public class AndroidAuthentication extends Activity {
 					// To display the Encrypted Auth String
 					TextView txtEncString = (TextView) findViewById(main.namespace.R.id.txtEncString);
 					txtEncString.setId(InputType.TYPE_CLASS_TEXT);
-					txtEncString.append(authString);
+					txtEncString.setText("Encrypted Auth String: " + authString);
+					
+					// For testing
+					//SendAuth("login", authString);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -96,34 +102,33 @@ public class AndroidAuthentication extends Activity {
 	// a few seconds.
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		IntentResult result = IntentIntegrator.parseActivityResult(requestCode,
-				resultCode, intent);
+		IntentResult result = IntentIntegrator.parseActivityResult(requestCode,resultCode, intent);
 		if ((result != null && resultCode == RESULT_OK) && requestCode == IntentIntegrator.REQUEST_CODE) {
 			CharSequence csContent = result.getContents();
 			TextView text = (TextView) findViewById(main.namespace.R.id.txtqrResults);
 			text.setInputType(InputType.TYPE_CLASS_TEXT);
 			if (csContent.toString() != null) {
-				Toast.makeText(AndroidAuthentication.this,
-						csContent.toString(), Toast.LENGTH_LONG).show();
+				Toast.makeText(AndroidAuthentication.this,csContent.toString(), Toast.LENGTH_LONG).show();
 				text.setText(csContent);
 				SendAuth("login", csAuthString.toString());
-
+				System.out.println("QR SECTION U/P: " + csUsername.toString() + " " + csPassword.toString());
 			} else {
-				Toast.makeText(AndroidAuthentication.this,
-						"Failed to read QR Code or no code scanned!",
-						Toast.LENGTH_LONG).show();
+				Toast.makeText(AndroidAuthentication.this,"Failed to read QR Code or no code scanned!",Toast.LENGTH_LONG).show();
+				System.out.println("QR/ELSE SECTION U/P: " + csUsername.toString() + " " + csPassword.toString());
 			}
-		} else if ((result != null && resultCode == RESULT_OK) && requestCode == SETTINGS){
+		} else if ((intent != null && resultCode == RESULT_OK) && requestCode == SETTINGS){
 			Bundle intExtras = intent.getExtras();
 			if (intExtras != null) {
 				csUsername = intExtras.getString("Settings.username");
 				csPassword = intExtras.getString("Settings.password");
+				System.out.println("Setting U/P: " + csUsername.toString() + " " + csPassword.toString());
 			} else {
-				csUsername = "null";
-				csPassword = "null";
+				csUsername = "nullS";
+				csPassword = "nullS";
 			}
-		} else if ((result != null && resultCode == RESULT_OK) && requestCode == REGISTER){
+		} else if ((intent != null && resultCode == RESULT_OK) && requestCode == REGISTER){
 			// Code for retrieving data from the Register screen
+			System.out.println("REGISTER SECTION U/P: " + csUsername.toString() + " " + csPassword.toString());
 		}
 	}
 	
@@ -164,23 +169,34 @@ public class AndroidAuthentication extends Activity {
 	// the listening website. The type parameter is whether it's
 	// for registering the phone or for logging in(this may or
 	// may not change depending on how it gets implemented.
-	private void SendAuth(String type, String authString) {
-		HttpParams params = new BasicHttpParams();
-		params.setParameter("type", type);
+	static void SendAuth(String type, String authString) {
+		Date newDate = new Date();
+//		HttpParams params = new BasicHttpParams();
+//		params.setParameter("type", type);
 		HttpClient client = new DefaultHttpClient();
+		// Used for testing POST requests very handy site @ http://www.posttestserver.com/
+		//HttpPost hPost = new HttpPost("http://205.196.210.187/post.php?dir=kevin");
+		HttpPost hPost = new HttpPost("http://209.85.145.141/cmpt352_server");
 		
+		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+        nameValuePairs.add(new BasicNameValuePair("auth", authString));
+        nameValuePairs.add(new BasicNameValuePair("type", type));
+        // I just threw time in here for fun, probably don't want it...
+        nameValuePairs.add(new BasicNameValuePair("time", Long.toString(newDate.getTime())));
+
 		if (type.equals("login")) {
 			try {
-				client.execute(new HttpHost(
-						"http://cmpt352server.appspot.com/cmpt352_server"),new HttpPost(authString));
-
+				hPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+				HttpResponse response = client.execute(hPost);
+				StatusLine status = response.getStatusLine();
+				System.out.println("RESPONSE: " + status.getReasonPhrase());
 			} catch (ClientProtocolException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		} else {
-			
+			// Do register stuffs
 		}
 	}
 	
@@ -210,17 +226,17 @@ public class AndroidAuthentication extends Activity {
 		// To display the UUID
 		TextView txtUUID = (TextView) findViewById(main.namespace.R.id.txtUUIDTitle);
 		txtUUID.setId(InputType.TYPE_CLASS_TEXT);
-		txtUUID.append(csUUID);
+		txtUUID.setText("UUID: " + csUUID);
 
 		// To display the IMEI
 		TextView txtIMEI = (TextView) findViewById(main.namespace.R.id.txtIMEI);
 		txtIMEI.setId(InputType.TYPE_CLASS_TEXT);
-		txtIMEI.append(csIMEI);
+		txtIMEI.setText("IMEI: " + csIMEI);
 
 		// To display the phone number
 		TextView txtPhoneNo = (TextView) findViewById(main.namespace.R.id.txtPhoneNo);
 		txtPhoneNo.setId(InputType.TYPE_CLASS_TEXT);
-		txtPhoneNo.append(csPhoneNo);
+		txtPhoneNo.setText("Phone Number: " + csPhoneNo);
 		
 		// To display the Auth String
 		TextView txtAuthString = (TextView) findViewById(main.namespace.R.id.txtAuthString);
@@ -232,7 +248,7 @@ public class AndroidAuthentication extends Activity {
 	
 	// Encrypts the parameter string (will be the Auth String) with AES
 	// encryption and returns it as a byte array.
-	private byte[] Encrypt(String newString) throws Exception{
+	static byte[] Encrypt(String newString) throws Exception{
 		System.out.println("TEST Original: " + newString);
 		KeyGenerator keyGen = KeyGenerator.getInstance("AES");
 		keyGen.init(128);
