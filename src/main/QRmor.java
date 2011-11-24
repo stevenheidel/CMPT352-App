@@ -135,14 +135,14 @@ public class QRmor extends Activity {
 			}
 		}  else if ((intent != null && resultCode == RESULT_OK) && requestCode == REGISTER){
 			// Code for retrieving data from the Register screen
-			Bundle extras = getIntent().getExtras();
+			Bundle extras = intent.getExtras();
 	        if (extras != null) {
 	            csUsername = extras.getString("Register.username");
 	            csPassword = extras.getString("Register.password");
 	            csRegCode = extras.getString("Register.regcode");
 	        }
-	        
-	        SendAuth("login", "https://cmpt352server.appspot.com/api/register" ,csUUID.toString(), csIMEI.toString(),
+	        GenerateAuthString();
+	        SendAuth("register", "https://cmpt352server.appspot.com/api/register", csUUID.toString(), csIMEI.toString(),
 					csPhoneNo.toString(), csAuthCode.toString(), csUsername.toString(),
 					csPassword.toString(),csRegCode.toString());
 	        
@@ -173,11 +173,6 @@ public class QRmor extends Activity {
 			Intent intAbout = new Intent(getApplicationContext(), About.class);
 			startActivity(intAbout);
 			return true;
-			// Settings menu no longer needed.
-//		case main.namespace.R.id.settings:
-//			Intent intSettings = new Intent(this, Settings.class);
-//			startActivityForResult(intSettings,SETTINGS);
-//			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -261,7 +256,7 @@ public class QRmor extends Activity {
         nameValuePairs.add(new BasicNameValuePair("PS", Password));
         nameValuePairs.add(new BasicNameValuePair("RC", RegCode));
 
-		if (type.equals("login")) {
+		if (type.equals("register")) {
 			try {
 				hPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
 				hPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));

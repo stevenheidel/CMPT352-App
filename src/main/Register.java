@@ -38,7 +38,7 @@ public class Register extends Activity {
 					
 					// There should be some sort of check to make sure it's really sent
 					// so this will probably be moved or removed
-					Toast.makeText(Register.this,"Phone Registration Sent!",Toast.LENGTH_SHORT).show();
+					Toast.makeText(Register.this,"Phone Registration Sent!",Toast.LENGTH_LONG).show();
 					
 					finish();
 				}
