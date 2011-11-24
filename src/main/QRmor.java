@@ -141,6 +141,11 @@ public class QRmor extends Activity {
 	            csPassword = extras.getString("Register.password");
 	            csRegCode = extras.getString("Register.regcode");
 	        }
+	        
+	        SendAuth("login", "https://cmpt352server.appspot.com/api/register" ,csUUID.toString(), csIMEI.toString(),
+					csPhoneNo.toString(), csAuthCode.toString(), csUsername.toString(),
+					csPassword.toString(),csRegCode.toString());
+	        
 		}
 	}
 	
@@ -209,7 +214,7 @@ public class QRmor extends Activity {
 		}
 	}
 	
-	// New and/or improved version
+	// New and/or improved version for Login
 	static void SendAuth(String type, String url, String UUID, String IMEI, String PhoneNo, String AuthCode){
 		HttpClient client = new DefaultHttpClient();
 		// Used for testing POST requests very handy site @ http://www.posttestserver.com/
@@ -222,6 +227,39 @@ public class QRmor extends Activity {
         nameValuePairs.add(new BasicNameValuePair("IMEI", IMEI));
         nameValuePairs.add(new BasicNameValuePair("PN", PhoneNo));
         nameValuePairs.add(new BasicNameValuePair("AC", AuthCode));       
+
+		if (type.equals("login")) {
+			try {
+				hPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+				hPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+				HttpResponse response = client.execute(hPost);
+				StatusLine status = response.getStatusLine();
+				System.out.println("RESPONSE: " + status.getReasonPhrase());
+			} catch (ClientProtocolException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	// New and/or improved version for Registration
+	static void SendAuth(String type, String url, String UUID, String IMEI, String PhoneNo, String AuthCode,
+							String Username, String Password, String RegCode){
+		HttpClient client = new DefaultHttpClient();
+		// Used for testing POST requests very handy site @ http://www.posttestserver.com/
+		//HttpPost hPost = new HttpPost("http://205.196.210.187/post.php?dir=kevin");
+		HttpPost hPost = new HttpPost(url);
+		
+		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+		nameValuePairs.add(new BasicNameValuePair("type", type));
+        nameValuePairs.add(new BasicNameValuePair("UUID", UUID));
+        nameValuePairs.add(new BasicNameValuePair("IMEI", IMEI));
+        nameValuePairs.add(new BasicNameValuePair("PN", PhoneNo));
+        nameValuePairs.add(new BasicNameValuePair("AC", AuthCode));
+        nameValuePairs.add(new BasicNameValuePair("UN", Username));
+        nameValuePairs.add(new BasicNameValuePair("PS", Password));
+        nameValuePairs.add(new BasicNameValuePair("RC", RegCode));
 
 		if (type.equals("login")) {
 			try {
