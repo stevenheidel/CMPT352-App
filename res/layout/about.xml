@@ -8,14 +8,14 @@
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="This is our project about smartphone authentication where we use QR codes to increase the security from the standard two step authentication."
+        android:text="QRMOR is our project about smartphone authentication where we use QR codes to increase the security from the standard two step authentication."
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
         android:id="@+id/txtDevBy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Developed by: Kevin Benard, Khaled Haggag, and Steven Heidel."
+        android:text="Developed by: Kevin Benard, Khaled Haggag, and Steven Heidel. QRMOR Inc. ©® Patent Pending"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </LinearLayout>

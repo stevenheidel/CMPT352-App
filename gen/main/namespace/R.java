@@ -15,14 +15,13 @@ public final class R {
     }
     public static final class id {
         public static final int TableLayout1=0x7f06000c;
-        public static final int about=0x7f06001b;
+        public static final int about=0x7f06001a;
         public static final int btnGenAuth=0x7f06000a;
         public static final int btnRegister=0x7f060013;
         public static final int btnSave=0x7f060018;
         public static final int launchQR=0x7f060003;
         public static final int main=0x7f060002;
         public static final int register=0x7f060019;
-        public static final int settings=0x7f06001a;
         public static final int tboxPassword=0x7f060017;
         public static final int tboxRegCode=0x7f060012;
         public static final int tboxRegPassword=0x7f060010;
