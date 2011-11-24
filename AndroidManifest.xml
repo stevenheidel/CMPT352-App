@@ -14,7 +14,7 @@
         android:label="@string/app_name" android:debuggable="true">
         <activity
             android:label="@string/app_name"
-            android:name="main.AndroidAuthentication" >
+            android:name="main.QRmor" >
             <intent-filter >
                 <action android:name="android.intent.action.MAIN" />
 

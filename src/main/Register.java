@@ -29,9 +29,9 @@ public class Register extends Activity {
 					
 					// Put the textbox values into the activity Extras so we can pass them back
 					// to the main screen.
-					newIntent.putExtra("Settings.username", tvUsername.getText().toString().trim());
-					newIntent.putExtra("Settings.password", tvPassword.getText().toString());
-					newIntent.putExtra("Settings.regcode", tvRegCode.getText().toString().trim());
+					newIntent.putExtra("Register.username", tvUsername.getText().toString().trim());
+					newIntent.putExtra("Register.password", tvPassword.getText().toString());
+					newIntent.putExtra("Register.regcode", tvRegCode.getText().toString().trim());
 					
 					// Pass the itent back to the caller and signal that everything went OK
 					setResult(RESULT_OK, newIntent);

@@ -1,6 +1,12 @@
 package main;
 
 import java.io.IOException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyPairGeneratorSpi;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -39,18 +45,21 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-public class AndroidAuthentication extends Activity {
+public class QRmor extends Activity {
 
-	final int SETTINGS = 0;
 	final int REGISTER = 1;
 	
 	private CharSequence csAuthString = "";
-	private CharSequence csUsername = "null";
-	private CharSequence csPassword = "null";
 	private CharSequence csPhoneNo = "";
 	private CharSequence csIMEI = "";
 	private CharSequence csUUID = "";
 	private CharSequence csAuthCode = "";
+	private CharSequence csRegCode = "";
+	private CharSequence csUsername = "";
+	private CharSequence csPassword = "";
+	
+
+
 
 	/** Called when the activity is first created. */
 	@Override
@@ -58,17 +67,20 @@ public class AndroidAuthentication extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(main.namespace.R.layout.main);
 		
+		// Start the QR Scanner right at the beginning.
+		IntentIntegrator.initiateScan(QRmor.this);
+		
 		// Button to launch the ZXing scanner
 		Button button = (Button) findViewById(main.namespace.R.id.launchQR);
 		// Button for generating the Auth String (for testing purposes not for release)
 		Button btnGenAuth = (Button) findViewById(main.namespace.R.id.btnGenAuth);
-
+		
 		// Starts the ZXing scanning library which sends the user into the
 		// Barcode Scanner app.
 		button.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				// Perform action on clicks
-				IntentIntegrator.initiateScan(AndroidAuthentication.this);
+				IntentIntegrator.initiateScan(QRmor.this);
 			}
 		});
 		
@@ -86,12 +98,11 @@ public class AndroidAuthentication extends Activity {
 					txtEncString.setText("Encrypted Auth String: " + authString);
 					
 					// For testing
-					//SendAuth("login", authString);
+					//SendAuth("login", authString,"http://url.com");
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
 			}
 		});
 	}
@@ -108,27 +119,28 @@ public class AndroidAuthentication extends Activity {
 			TextView text = (TextView) findViewById(main.namespace.R.id.txtqrResults);
 			text.setInputType(InputType.TYPE_CLASS_TEXT);
 			if (csContent.toString() != null) {
-				Toast.makeText(AndroidAuthentication.this,csContent.toString(), Toast.LENGTH_LONG).show();
+				Toast.makeText(QRmor.this,csContent.toString(), Toast.LENGTH_LONG).show();
 				text.setText(csContent);
-				SendAuth("login", csAuthString.toString(),csContent.toString());
-				System.out.println("QR SECTION U/P: " + csUsername.toString() + " " + csPassword.toString());
+				try {
+					GenerateAuthString();
+					String encString = new String(Encrypt(csContent.toString()));
+					SendAuth("login", csContent.toString(), csUUID.toString(), csIMEI.toString(),
+								csPhoneNo.toString(), csAuthCode.toString());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}	
 			} else {
-				Toast.makeText(AndroidAuthentication.this,"Failed to read QR Code or no code scanned!",Toast.LENGTH_LONG).show();
-				System.out.println("QR/ELSE SECTION U/P: " + csUsername.toString() + " " + csPassword.toString());
+				Toast.makeText(QRmor.this,"Failed to read QR Code or no code scanned!",Toast.LENGTH_LONG).show();
 			}
-		} else if ((intent != null && resultCode == RESULT_OK) && requestCode == SETTINGS){
-			Bundle intExtras = intent.getExtras();
-			if (intExtras != null) {
-				csUsername = intExtras.getString("Settings.username");
-				csPassword = intExtras.getString("Settings.password");
-				System.out.println("Setting U/P: " + csUsername.toString() + " " + csPassword.toString());
-			} else {
-				csUsername = "nullS";
-				csPassword = "nullS";
-			}
-		} else if ((intent != null && resultCode == RESULT_OK) && requestCode == REGISTER){
+		}  else if ((intent != null && resultCode == RESULT_OK) && requestCode == REGISTER){
 			// Code for retrieving data from the Register screen
-			System.out.println("REGISTER SECTION U/P: " + csUsername.toString() + " " + csPassword.toString());
+			Bundle extras = getIntent().getExtras();
+	        if (extras != null) {
+	            csUsername = extras.getString("Register.username");
+	            csPassword = extras.getString("Register.password");
+	            csRegCode = extras.getString("Register.regcode");
+	        }
 		}
 	}
 	
@@ -150,16 +162,17 @@ public class AndroidAuthentication extends Activity {
 		switch (item.getItemId()) {
 		case main.namespace.R.id.register:
 			Intent intReg = new Intent(getApplicationContext(), Register.class);
-			startActivity(intReg);
+			startActivityForResult(intReg,REGISTER);
 			return true;
 		case main.namespace.R.id.about:
 			Intent intAbout = new Intent(getApplicationContext(), About.class);
 			startActivity(intAbout);
 			return true;
-		case main.namespace.R.id.settings:
-			Intent intSettings = new Intent(this, Settings.class);
-			startActivityForResult(intSettings,SETTINGS);
-			return true;
+			// Settings menu no longer needed.
+//		case main.namespace.R.id.settings:
+//			Intent intSettings = new Intent(this, Settings.class);
+//			startActivityForResult(intSettings,SETTINGS);
+//			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -169,10 +182,7 @@ public class AndroidAuthentication extends Activity {
 	// the listening website. The type parameter is whether it's
 	// for registering the phone or for logging in(this may or
 	// may not change depending on how it gets implemented.
-	static void SendAuth(String type, String authString,String url) {
-		Date newDate = new Date();
-//		HttpParams params = new BasicHttpParams();
-//		params.setParameter("type", type);
+	static void SendAuth(String type, String authString, String url) {
 		HttpClient client = new DefaultHttpClient();
 		// Used for testing POST requests very handy site @ http://www.posttestserver.com/
 		//HttpPost hPost = new HttpPost("http://205.196.210.187/post.php?dir=kevin");
@@ -181,11 +191,10 @@ public class AndroidAuthentication extends Activity {
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
         nameValuePairs.add(new BasicNameValuePair("auth", authString));
         nameValuePairs.add(new BasicNameValuePair("type", type));
-        // I just threw time in here for fun, probably don't want it...
-        nameValuePairs.add(new BasicNameValuePair("time", Long.toString(newDate.getTime())));
 
 		if (type.equals("login")) {
 			try {
+				hPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
 				hPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 				HttpResponse response = client.execute(hPost);
 				StatusLine status = response.getStatusLine();
@@ -197,6 +206,35 @@ public class AndroidAuthentication extends Activity {
 			}
 		} else {
 			// Do register stuffs
+		}
+	}
+	
+	// New and/or improved version
+	static void SendAuth(String type, String url, String UUID, String IMEI, String PhoneNo, String AuthCode){
+		HttpClient client = new DefaultHttpClient();
+		// Used for testing POST requests very handy site @ http://www.posttestserver.com/
+		//HttpPost hPost = new HttpPost("http://205.196.210.187/post.php?dir=kevin");
+		HttpPost hPost = new HttpPost(url);
+		
+		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+		nameValuePairs.add(new BasicNameValuePair("type", type));
+        nameValuePairs.add(new BasicNameValuePair("UUID", UUID));
+        nameValuePairs.add(new BasicNameValuePair("IMEI", IMEI));
+        nameValuePairs.add(new BasicNameValuePair("PN", PhoneNo));
+        nameValuePairs.add(new BasicNameValuePair("AC", AuthCode));       
+
+		if (type.equals("login")) {
+			try {
+				hPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+				hPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+				HttpResponse response = client.execute(hPost);
+				StatusLine status = response.getStatusLine();
+				System.out.println("RESPONSE: " + status.getReasonPhrase());
+			} catch (ClientProtocolException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -217,11 +255,9 @@ public class AndroidAuthentication extends Activity {
 		// This csAuthString will eventually be an encrypted string
 		// of some length. For prototype purposes it's in plaintext.
 		csAuthString = "UUID=" + csUUID.toString() + "&" +
-									"IMEI=" + csIMEI.toString() + "&" +
-									"PN=" + csPhoneNo.toString() + "&" +
-									"UN=" + csUsername.toString() + "&" + 
-									"PS=" + csPassword.toString() + "&" +
-									"AC=" + csAuthCode.toString();
+						"IMEI=" + csIMEI.toString() + "&" +
+						"PN=" + csPhoneNo.toString() + "&" +
+						"AC=" + csAuthCode.toString();
 
 		// To display the UUID
 		TextView txtUUID = (TextView) findViewById(main.namespace.R.id.txtUUIDTitle);
