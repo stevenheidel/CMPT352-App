@@ -142,7 +142,7 @@ public class QRmor extends Activity {
 	            csRegCode = extras.getString("Register.regcode");
 	        }
 	        GenerateAuthString();
-	        SendAuth("register", "https://cmpt352server.appspot.com/api/register", csUUID.toString(), csIMEI.toString(),
+	        SendAuth("register", "https://qrmorserver.appspot.com/api/register", csUUID.toString(), csIMEI.toString(),
 					csPhoneNo.toString(), csAuthCode.toString(), csUsername.toString(),
 					csPassword.toString(),csRegCode.toString());
 	        
