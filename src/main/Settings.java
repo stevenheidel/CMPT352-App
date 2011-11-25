@@ -13,9 +13,9 @@ public class Settings extends Activity {
 	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(main.namespace.R.layout.settings);
+		setContentView(com.qrmor.R.layout.settings);
 
-		Button btnSave = (Button) findViewById(main.namespace.R.id.btnSave);
+		Button btnSave = (Button) findViewById(com.qrmor.R.id.btnSave);
 
 		btnSave.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -24,8 +24,8 @@ public class Settings extends Activity {
 				
 				// Assign textviews to the appropriate textboxes so we can take values 
 				// out of them.
-				TextView tvUsername = (TextView) findViewById(main.namespace.R.id.tboxUsername);
-				TextView tvPassword = (TextView) findViewById(main.namespace.R.id.tboxPassword);
+				TextView tvUsername = (TextView) findViewById(com.qrmor.R.id.tboxUsername);
+				TextView tvPassword = (TextView) findViewById(com.qrmor.R.id.tboxPassword);
 				
 				// Put the textbox values into the activity Extras so we can pass them back
 				// to the main screen.
