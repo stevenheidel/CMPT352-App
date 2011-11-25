@@ -1,12 +1,6 @@
 package main;
 
 import java.io.IOException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.KeyPairGeneratorSpi;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -100,7 +94,6 @@ public class QRmor extends Activity {
 					// For testing
 					//SendAuth("login", authString,"http://url.com");
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -123,11 +116,11 @@ public class QRmor extends Activity {
 				text.setText(csContent);
 				try {
 					GenerateAuthString();
-					String encString = new String(Encrypt(csContent.toString()));
-					SendAuth("login", csContent.toString(), csUUID.toString(), csIMEI.toString(),
-								csPhoneNo.toString(), csAuthCode.toString());
+					
+					LoginAuth login = new LoginAuth(csUUID.toString(),csIMEI.toString(),csPhoneNo.toString(),csAuthCode.toString());
+			        
+			        SendAuth("login", csContent.toString(), login);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}	
 			} else {
@@ -142,9 +135,9 @@ public class QRmor extends Activity {
 	            csRegCode = extras.getString("Register.regcode");
 	        }
 	        GenerateAuthString();
-	        SendAuth("register", "https://qrmorserver.appspot.com/api/register", csUUID.toString(), csIMEI.toString(),
-					csPhoneNo.toString(), csAuthCode.toString(), csUsername.toString(),
-					csPassword.toString(),csRegCode.toString());
+	        LoginAuth login = new LoginAuth(csUUID.toString(),csIMEI.toString(),csPhoneNo.toString(),csAuthCode.toString());
+	        RegAuth reg = new RegAuth(csUsername.toString(),csPassword.toString(),csRegCode.toString());
+	        SendAuth("register", reg, login);
 	        
 		}
 	}
@@ -178,39 +171,8 @@ public class QRmor extends Activity {
 		}
 	}
 	
-	// Function for sending the authentication string to
-	// the listening website. The type parameter is whether it's
-	// for registering the phone or for logging in(this may or
-	// may not change depending on how it gets implemented.
-//	static void SendAuth(String type, String authString, String url) {
-//		HttpClient client = new DefaultHttpClient();
-//		// Used for testing POST requests very handy site @ http://www.posttestserver.com/
-//		//HttpPost hPost = new HttpPost("http://205.196.210.187/post.php?dir=kevin");
-//		HttpPost hPost = new HttpPost(url);
-//		
-//		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-//        nameValuePairs.add(new BasicNameValuePair("auth", authString));
-//        nameValuePairs.add(new BasicNameValuePair("type", type));
-//
-//		if (type.equals("login")) {
-//			try {
-//				hPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-//				hPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-//				HttpResponse response = client.execute(hPost);
-//				StatusLine status = response.getStatusLine();
-//				System.out.println("RESPONSE: " + status.getReasonPhrase());
-//			} catch (ClientProtocolException e) {
-//				e.printStackTrace();
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//		} else {
-//			// Do register stuffs
-//		}
-//	}
-	
-	// New and/or improved version for Login
-	static void SendAuth(String type, String url, String UUID, String IMEI, String PhoneNo, String AuthCode){
+	// LOGIN
+	static void SendAuth(String type, String url, LoginAuth login){
 		HttpClient client = new DefaultHttpClient();
 		// Used for testing POST requests very handy site @ http://www.posttestserver.com/
 		//HttpPost hPost = new HttpPost("http://205.196.210.187/post.php?dir=kevin");
@@ -218,10 +180,10 @@ public class QRmor extends Activity {
 		
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
 		nameValuePairs.add(new BasicNameValuePair("type", type));
-        nameValuePairs.add(new BasicNameValuePair("UUID", UUID));
-        nameValuePairs.add(new BasicNameValuePair("IMEI", IMEI));
-        nameValuePairs.add(new BasicNameValuePair("PN", PhoneNo));
-        nameValuePairs.add(new BasicNameValuePair("AC", AuthCode));       
+        nameValuePairs.add(new BasicNameValuePair("UUID", login.getUUID()));
+        nameValuePairs.add(new BasicNameValuePair("IMEI", login.getIMEI()));
+        nameValuePairs.add(new BasicNameValuePair("PN", login.getPhoneNo()));
+        nameValuePairs.add(new BasicNameValuePair("AC", login.getAuthCode()));       
 
 		if (type.equals("login")) {
 			try {
@@ -238,27 +200,30 @@ public class QRmor extends Activity {
 		}
 	}
 	
-	// New and/or improved version for Registration
-	static void SendAuth(String type, String url, String UUID, String IMEI, String PhoneNo, String AuthCode,
-							String Username, String Password, String RegCode){
+	// REGISTRATION
+	static void SendAuth(String type, RegAuth reg, LoginAuth login) {
 		HttpClient client = new DefaultHttpClient();
-		// Used for testing POST requests very handy site @ http://www.posttestserver.com/
+		// Used for testing POST requests very handy site @
+		// http://www.posttestserver.com/
+		// HttpPost hPost = new
+		// HttpPost("http://205.196.210.187/post.php?dir=kevin");
 		//HttpPost hPost = new HttpPost("http://205.196.210.187/post.php?dir=kevin");
-		HttpPost hPost = new HttpPost(url);
-		
+		HttpPost hPost = new HttpPost("https://qrmorserver.appspot.com/api/register");
+
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
 		nameValuePairs.add(new BasicNameValuePair("type", type));
-        nameValuePairs.add(new BasicNameValuePair("UUID", UUID));
-        nameValuePairs.add(new BasicNameValuePair("IMEI", IMEI));
-        nameValuePairs.add(new BasicNameValuePair("PN", PhoneNo));
-        nameValuePairs.add(new BasicNameValuePair("AC", AuthCode));
-        nameValuePairs.add(new BasicNameValuePair("UN", Username));
-        nameValuePairs.add(new BasicNameValuePair("PS", Password));
-        nameValuePairs.add(new BasicNameValuePair("RC", RegCode));
+		nameValuePairs.add(new BasicNameValuePair("UUID", login.getUUID()));
+		nameValuePairs.add(new BasicNameValuePair("IMEI", login.getIMEI()));
+		nameValuePairs.add(new BasicNameValuePair("PN", login.getUUID()));
+		nameValuePairs.add(new BasicNameValuePair("AC", login.getAuthCode()));
+		nameValuePairs.add(new BasicNameValuePair("UN", reg.getUsername()));
+		nameValuePairs.add(new BasicNameValuePair("PS", reg.getPassword()));
+		nameValuePairs.add(new BasicNameValuePair("RC", reg.getRegCode()));
 
 		if (type.equals("register")) {
 			try {
-				hPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+				hPost.setHeader("Content-Type",
+						"application/x-www-form-urlencoded");
 				hPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 				HttpResponse response = client.execute(hPost);
 				StatusLine status = response.getStatusLine();
