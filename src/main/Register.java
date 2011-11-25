@@ -13,9 +13,9 @@ public class Register extends Activity {
 
 	 public void onCreate(Bundle savedInstanceState) {
 	        super.onCreate(savedInstanceState);
-	        setContentView(main.namespace.R.layout.register);
+	        setContentView(com.qrmor.R.layout.register);
 	        
-	        Button btnRegister = (Button) findViewById(main.namespace.R.id.btnRegister);
+	        Button btnRegister = (Button) findViewById(com.qrmor.R.id.btnRegister);
 	        
 	        btnRegister.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
@@ -23,9 +23,9 @@ public class Register extends Activity {
 					Intent newIntent = new Intent();
 					
 					// Assign textviews to the appropriate textboxes
-					TextView tvUsername = (TextView) findViewById(main.namespace.R.id.tboxRegUsername);
-					TextView tvPassword = (TextView) findViewById(main.namespace.R.id.tboxRegPassword);
-					TextView tvRegCode = (TextView) findViewById(main.namespace.R.id.tboxRegCode);
+					TextView tvUsername = (TextView) findViewById(com.qrmor.R.id.tboxRegUsername);
+					TextView tvPassword = (TextView) findViewById(com.qrmor.R.id.tboxRegPassword);
+					TextView tvRegCode = (TextView) findViewById(com.qrmor.R.id.tboxRegCode);
 					
 					// Put the textbox values into the activity Extras so we can pass them back
 					// to the main screen.

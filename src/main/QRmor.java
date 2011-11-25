@@ -65,15 +65,15 @@ public class QRmor extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(main.namespace.R.layout.main);
+		setContentView(com.qrmor.R.layout.main);
 		
 		// Start the QR Scanner right at the beginning.
 		IntentIntegrator.initiateScan(QRmor.this);
 		
 		// Button to launch the ZXing scanner
-		Button button = (Button) findViewById(main.namespace.R.id.launchQR);
+		Button button = (Button) findViewById(com.qrmor.R.id.launchQR);
 		// Button for generating the Auth String (for testing purposes not for release)
-		Button btnGenAuth = (Button) findViewById(main.namespace.R.id.btnGenAuth);
+		Button btnGenAuth = (Button) findViewById(com.qrmor.R.id.btnGenAuth);
 		
 		// Starts the ZXing scanning library which sends the user into the
 		// Barcode Scanner app.
@@ -93,7 +93,7 @@ public class QRmor extends Activity {
 				try {
 					String authString = new String(Encrypt(csAuthCode.toString()));
 					// To display the Encrypted Auth String
-					TextView txtEncString = (TextView) findViewById(main.namespace.R.id.txtEncString);
+					TextView txtEncString = (TextView) findViewById(com.qrmor.R.id.txtEncString);
 					txtEncString.setId(InputType.TYPE_CLASS_TEXT);
 					txtEncString.setText("Encrypted Auth String: " + authString);
 					
@@ -116,7 +116,7 @@ public class QRmor extends Activity {
 		IntentResult result = IntentIntegrator.parseActivityResult(requestCode,resultCode, intent);
 		if ((result != null && resultCode == RESULT_OK) && requestCode == IntentIntegrator.REQUEST_CODE) {
 			CharSequence csContent = result.getContents();
-			TextView text = (TextView) findViewById(main.namespace.R.id.txtqrResults);
+			TextView text = (TextView) findViewById(com.qrmor.R.id.txtqrResults);
 			text.setInputType(InputType.TYPE_CLASS_TEXT);
 			if (csContent.toString() != null) {
 				Toast.makeText(QRmor.this,csContent.toString(), Toast.LENGTH_LONG).show();
@@ -155,7 +155,7 @@ public class QRmor extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(main.namespace.R.menu.menu, menu);
+		inflater.inflate(com.qrmor.R.menu.menu, menu);
 		return true;
 	}
 
@@ -165,11 +165,11 @@ public class QRmor extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
 		switch (item.getItemId()) {
-		case main.namespace.R.id.register:
+		case com.qrmor.R.id.register:
 			Intent intReg = new Intent(getApplicationContext(), Register.class);
 			startActivityForResult(intReg,REGISTER);
 			return true;
-		case main.namespace.R.id.about:
+		case com.qrmor.R.id.about:
 			Intent intAbout = new Intent(getApplicationContext(), About.class);
 			startActivity(intAbout);
 			return true;
@@ -293,22 +293,22 @@ public class QRmor extends Activity {
 						"AC=" + csAuthCode.toString();
 
 		// To display the UUID
-		TextView txtUUID = (TextView) findViewById(main.namespace.R.id.txtUUIDTitle);
+		TextView txtUUID = (TextView) findViewById(com.qrmor.R.id.txtUUIDTitle);
 		txtUUID.setId(InputType.TYPE_CLASS_TEXT);
 		txtUUID.setText("UUID: " + csUUID);
 
 		// To display the IMEI
-		TextView txtIMEI = (TextView) findViewById(main.namespace.R.id.txtIMEI);
+		TextView txtIMEI = (TextView) findViewById(com.qrmor.R.id.txtIMEI);
 		txtIMEI.setId(InputType.TYPE_CLASS_TEXT);
 		txtIMEI.setText("IMEI: " + csIMEI);
 
 		// To display the phone number
-		TextView txtPhoneNo = (TextView) findViewById(main.namespace.R.id.txtPhoneNo);
+		TextView txtPhoneNo = (TextView) findViewById(com.qrmor.R.id.txtPhoneNo);
 		txtPhoneNo.setId(InputType.TYPE_CLASS_TEXT);
 		txtPhoneNo.setText("Phone Number: " + csPhoneNo);
 		
 		// To display the Auth String
-		TextView txtAuthString = (TextView) findViewById(main.namespace.R.id.txtAuthString);
+		TextView txtAuthString = (TextView) findViewById(com.qrmor.R.id.txtAuthString);
 		txtAuthString.setId(InputType.TYPE_CLASS_TEXT);
 		txtAuthString.setText("Auth String: " + csAuthString);
 		
