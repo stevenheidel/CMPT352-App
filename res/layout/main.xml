@@ -55,13 +55,6 @@
         android:id="@+id/btnGenAuth"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Generate Auth String" />
-
-    <TextView
-        android:id="@+id/txtEncString"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Encrypted Auth String: "
-        android:textAppearance="?android:attr/textAppearanceSmall" android:hapticFeedbackEnabled="false"/>
+        android:text="Generate Auth String" android:visibility="invisible"/>
 
 </TableLayout>

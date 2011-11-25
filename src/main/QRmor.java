@@ -79,25 +79,25 @@ public class QRmor extends Activity {
 		});
 		
 		// Generates the Auth String
-		btnGenAuth.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				// Perform action on clicks
-				csAuthCode = GenerateAuthString();
-				
-				try {
-					String authString = new String(Encrypt(csAuthCode.toString()));
-					// To display the Encrypted Auth String
-					TextView txtEncString = (TextView) findViewById(com.qrmor.R.id.txtEncString);
-					txtEncString.setId(InputType.TYPE_CLASS_TEXT);
-					txtEncString.setText("Encrypted Auth String: " + authString);
-					
-					// For testing
-					//SendAuth("login", authString,"http://url.com");
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+//		btnGenAuth.setOnClickListener(new OnClickListener() {
+//			public void onClick(View v) {
+//				// Perform action on clicks
+//				csAuthCode = GenerateAuthString();
+//				
+//				try {
+//					String authString = new String(Encrypt(csAuthCode.toString()));
+//					// To display the Encrypted Auth String
+//					TextView txtEncString = (TextView) findViewById(com.qrmor.R.id.txtEncString);
+//					txtEncString.setId(InputType.TYPE_CLASS_TEXT);
+//					txtEncString.setText("Encrypted Auth String: " + authString);
+//					
+//					// For testing
+//					//SendAuth("login", authString,"http://url.com");
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
 	}
 
 	// Function for retrieving the results of the ZXing scanning library.
