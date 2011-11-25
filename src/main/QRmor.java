@@ -182,32 +182,32 @@ public class QRmor extends Activity {
 	// the listening website. The type parameter is whether it's
 	// for registering the phone or for logging in(this may or
 	// may not change depending on how it gets implemented.
-	static void SendAuth(String type, String authString, String url) {
-		HttpClient client = new DefaultHttpClient();
-		// Used for testing POST requests very handy site @ http://www.posttestserver.com/
-		//HttpPost hPost = new HttpPost("http://205.196.210.187/post.php?dir=kevin");
-		HttpPost hPost = new HttpPost(url);
-		
-		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-        nameValuePairs.add(new BasicNameValuePair("auth", authString));
-        nameValuePairs.add(new BasicNameValuePair("type", type));
-
-		if (type.equals("login")) {
-			try {
-				hPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-				hPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-				HttpResponse response = client.execute(hPost);
-				StatusLine status = response.getStatusLine();
-				System.out.println("RESPONSE: " + status.getReasonPhrase());
-			} catch (ClientProtocolException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} else {
-			// Do register stuffs
-		}
-	}
+//	static void SendAuth(String type, String authString, String url) {
+//		HttpClient client = new DefaultHttpClient();
+//		// Used for testing POST requests very handy site @ http://www.posttestserver.com/
+//		//HttpPost hPost = new HttpPost("http://205.196.210.187/post.php?dir=kevin");
+//		HttpPost hPost = new HttpPost(url);
+//		
+//		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+//        nameValuePairs.add(new BasicNameValuePair("auth", authString));
+//        nameValuePairs.add(new BasicNameValuePair("type", type));
+//
+//		if (type.equals("login")) {
+//			try {
+//				hPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+//				hPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+//				HttpResponse response = client.execute(hPost);
+//				StatusLine status = response.getStatusLine();
+//				System.out.println("RESPONSE: " + status.getReasonPhrase());
+//			} catch (ClientProtocolException e) {
+//				e.printStackTrace();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//		} else {
+//			// Do register stuffs
+//		}
+//	}
 	
 	// New and/or improved version for Login
 	static void SendAuth(String type, String url, String UUID, String IMEI, String PhoneNo, String AuthCode){
