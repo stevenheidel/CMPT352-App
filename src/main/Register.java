@@ -32,6 +32,7 @@ public class Register extends Activity {
 					newIntent.putExtra("Register.username", tvUsername.getText().toString().trim());
 					newIntent.putExtra("Register.password", tvPassword.getText().toString());
 					newIntent.putExtra("Register.regcode", tvRegCode.getText().toString().trim());
+					newIntent.putExtra("Register.hasRegistered", true);
 					
 					// Pass the itent back to the caller and signal that everything went OK
 					setResult(RESULT_OK, newIntent);

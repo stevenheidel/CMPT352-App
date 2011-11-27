@@ -22,7 +22,10 @@ import org.apache.http.message.BasicNameValuePair;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
@@ -42,6 +45,7 @@ import com.google.zxing.integration.android.IntentResult;
 public class QRmor extends Activity {
 
 	final int REGISTER = 1;
+	Boolean firstRun = true;
 	
 	private CharSequence csAuthString = "";
 	private CharSequence csPhoneNo = "";
@@ -52,6 +56,7 @@ public class QRmor extends Activity {
 	private CharSequence csUsername = "";
 	private CharSequence csPassword = "";
 	
+	SharedPreferences prefs;
 
 
 
@@ -60,14 +65,24 @@ public class QRmor extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(com.qrmor.R.layout.main);
-		
-		// Start the QR Scanner right at the beginning.
-		IntentIntegrator.initiateScan(QRmor.this);
+
+		prefs = this.getSharedPreferences("prefs", MODE_PRIVATE);
+
+		if(!this.getSharedPreferences("prefs", Context.MODE_PRIVATE).getBoolean("Registered", false) 
+				&& firstRun == true){
+			Intent intReg = new Intent(getApplicationContext(), Register.class);
+			startActivityForResult(intReg,REGISTER);
+			firstRun = false;
+		} else if (firstRun == true){
+			// Start the QR Scanner right at the beginning.
+			IntentIntegrator.initiateScan(QRmor.this);
+			firstRun = false;
+		} else {
+			firstRun = false;
+		}
 		
 		// Button to launch the ZXing scanner
 		Button button = (Button) findViewById(com.qrmor.R.id.launchQR);
-		// Button for generating the Auth String (for testing purposes not for release)
-		Button btnGenAuth = (Button) findViewById(com.qrmor.R.id.btnGenAuth);
 		
 		// Starts the ZXing scanning library which sends the user into the
 		// Barcode Scanner app.
@@ -78,26 +93,6 @@ public class QRmor extends Activity {
 			}
 		});
 		
-		// Generates the Auth String
-//		btnGenAuth.setOnClickListener(new OnClickListener() {
-//			public void onClick(View v) {
-//				// Perform action on clicks
-//				csAuthCode = GenerateAuthString();
-//				
-//				try {
-//					String authString = new String(Encrypt(csAuthCode.toString()));
-//					// To display the Encrypted Auth String
-//					TextView txtEncString = (TextView) findViewById(com.qrmor.R.id.txtEncString);
-//					txtEncString.setId(InputType.TYPE_CLASS_TEXT);
-//					txtEncString.setText("Encrypted Auth String: " + authString);
-//					
-//					// For testing
-//					//SendAuth("login", authString,"http://url.com");
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		});
 	}
 
 	// Function for retrieving the results of the ZXing scanning library.
@@ -118,7 +113,7 @@ public class QRmor extends Activity {
 					GenerateAuthString();
 					
 					LoginAuth login = new LoginAuth(csUUID.toString(),csIMEI.toString(),csPhoneNo.toString(),csAuthCode.toString());
-			        
+					Toast.makeText(QRmor.this,"Login Sent!",Toast.LENGTH_LONG).show();
 			        SendAuth("login", csContent.toString(), login);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -133,7 +128,14 @@ public class QRmor extends Activity {
 	            csUsername = extras.getString("Register.username");
 	            csPassword = extras.getString("Register.password");
 	            csRegCode = extras.getString("Register.regcode");
+	            
+	            if (extras.getBoolean("Register.registered")){
+	            	SharedPreferences.Editor prefsEditor = prefs.edit();
+	            	 prefsEditor.putBoolean("Registered", true);
+	                 prefsEditor.commit();
+	            }
 	        }
+	        
 	        GenerateAuthString();
 	        LoginAuth login = new LoginAuth(csUUID.toString(),csIMEI.toString(),csPhoneNo.toString(),csAuthCode.toString());
 	        RegAuth reg = new RegAuth(csUsername.toString(),csPassword.toString(),csRegCode.toString());
@@ -176,7 +178,7 @@ public class QRmor extends Activity {
 		HttpClient client = new DefaultHttpClient();
 		// Used for testing POST requests very handy site @ http://www.posttestserver.com/
 		//HttpPost hPost = new HttpPost("http://205.196.210.187/post.php?dir=kevin");
-		HttpPost hPost = new HttpPost(url);
+		HttpPost hPost = new HttpPost("https://qrmorserver.appspot.com/qrauth/" + url);
 		
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
 		nameValuePairs.add(new BasicNameValuePair("type", type));
