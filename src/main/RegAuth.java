@@ -22,7 +22,7 @@ public class RegAuth {
 	}
 
 	public void setUsername(CharSequence username) {
-		Username = username.toString();
+		this.Username = username.toString();
 	}
 
 	public String getPassword() {
@@ -30,15 +30,15 @@ public class RegAuth {
 	}
 
 	public void setPassword(CharSequence password) {
-		Password = password.toString();
+		this.Password = password.toString();
 	}
 
 	public String getRegCode() {
-		return RegCode;
+		return this.RegCode;
 	}
 
 	public void setRegCode(CharSequence regCode) {
-		RegCode = regCode.toString();
+		this.RegCode = regCode.toString();
 	}
 
 

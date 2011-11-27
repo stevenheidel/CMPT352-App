@@ -22,10 +22,9 @@ import org.apache.http.message.BasicNameValuePair;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
@@ -43,7 +42,6 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 public class QRmor extends Activity {
-
 	final int REGISTER = 1;
 	Boolean firstRun = true;
 	
@@ -58,8 +56,6 @@ public class QRmor extends Activity {
 	
 	SharedPreferences prefs;
 
-
-
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -73,13 +69,11 @@ public class QRmor extends Activity {
 			Intent intReg = new Intent(getApplicationContext(), Register.class);
 			startActivityForResult(intReg,REGISTER);
 			firstRun = false;
-		} else if (firstRun == true){
-			// Start the QR Scanner right at the beginning.
-			IntentIntegrator.initiateScan(QRmor.this);
-			firstRun = false;
 		} else {
+			// Start the QR Scanner right at the beginning.
 			firstRun = false;
-		}
+			IntentIntegrator.initiateScan(QRmor.this);			
+		} 
 		
 		// Button to launch the ZXing scanner
 		Button button = (Button) findViewById(com.qrmor.R.id.launchQR);
@@ -93,6 +87,14 @@ public class QRmor extends Activity {
 			}
 		});
 		
+	}
+	
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+	  super.onConfigurationChanged(newConfig);
+	  setContentView(com.qrmor.R.layout.main);
+	  firstRun = false;
 	}
 
 	// Function for retrieving the results of the ZXing scanning library.
@@ -178,7 +180,7 @@ public class QRmor extends Activity {
 		HttpClient client = new DefaultHttpClient();
 		// Used for testing POST requests very handy site @ http://www.posttestserver.com/
 		//HttpPost hPost = new HttpPost("http://205.196.210.187/post.php?dir=kevin");
-		HttpPost hPost = new HttpPost("https://qrmorserver.appspot.com/qrauth/" + url);
+		HttpPost hPost = new HttpPost("https://qrmorserver.appspot.com/api/qrauth/" + url);
 		
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
 		nameValuePairs.add(new BasicNameValuePair("type", type));
@@ -187,18 +189,18 @@ public class QRmor extends Activity {
         nameValuePairs.add(new BasicNameValuePair("PN", login.getPhoneNo()));
         nameValuePairs.add(new BasicNameValuePair("AC", login.getAuthCode()));       
 
-		if (type.equals("login")) {
-			try {
-				hPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-				hPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-				HttpResponse response = client.execute(hPost);
-				StatusLine status = response.getStatusLine();
-				System.out.println("RESPONSE: " + status.getReasonPhrase());
-			} catch (ClientProtocolException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		try {
+			hPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+			hPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+			HttpResponse response = client.execute(hPost);
+			StatusLine status = response.getStatusLine();
+			System.out.println("RESPONSE: " + status.getReasonPhrase());
+			System.out.println("RESPONSE: "
+					+ "https://qrmorserver.appspot.com/api/qrauth/" + url);
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -216,25 +218,22 @@ public class QRmor extends Activity {
 		nameValuePairs.add(new BasicNameValuePair("type", type));
 		nameValuePairs.add(new BasicNameValuePair("UUID", login.getUUID()));
 		nameValuePairs.add(new BasicNameValuePair("IMEI", login.getIMEI()));
-		nameValuePairs.add(new BasicNameValuePair("PN", login.getUUID()));
+		nameValuePairs.add(new BasicNameValuePair("PN", login.getPhoneNo()));
 		nameValuePairs.add(new BasicNameValuePair("AC", login.getAuthCode()));
 		nameValuePairs.add(new BasicNameValuePair("UN", reg.getUsername()));
 		nameValuePairs.add(new BasicNameValuePair("PS", reg.getPassword()));
 		nameValuePairs.add(new BasicNameValuePair("RC", reg.getRegCode()));
 
-		if (type.equals("register")) {
-			try {
-				hPost.setHeader("Content-Type",
-						"application/x-www-form-urlencoded");
-				hPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-				HttpResponse response = client.execute(hPost);
-				StatusLine status = response.getStatusLine();
-				System.out.println("RESPONSE: " + status.getReasonPhrase());
-			} catch (ClientProtocolException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		try {
+			hPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+			hPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+			HttpResponse response = client.execute(hPost);
+			StatusLine status = response.getStatusLine();
+			System.out.println("RESPONSE: " + status.getReasonPhrase());
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
