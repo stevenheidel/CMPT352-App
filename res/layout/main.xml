@@ -5,11 +5,12 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/launchQR"
+    <TextView
+        android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Launch QR Code Reader" />
+        android:text="QRMOR"
+        android:textAppearance="?android:attr/textAppearanceLarge" android:layout_gravity="center_horizontal" android:typeface="serif" android:ellipsize="none" android:gravity="center"/>
 
     <TextView
         android:id="@+id/txtqrCodeTitle"

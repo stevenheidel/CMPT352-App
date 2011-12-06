@@ -5,11 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
@@ -32,9 +27,6 @@ import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,7 +56,7 @@ public class QRmor extends Activity {
 
 		prefs = this.getSharedPreferences("prefs", MODE_PRIVATE);
 
-		if(!this.getSharedPreferences("prefs", Context.MODE_PRIVATE).getBoolean("Registered", false) 
+		if(!prefs.getBoolean("Registered", true) 
 				&& firstRun == true){
 			Intent intReg = new Intent(getApplicationContext(), Register.class);
 			startActivityForResult(intReg,REGISTER);
@@ -73,20 +65,7 @@ public class QRmor extends Activity {
 			// Start the QR Scanner right at the beginning.
 			firstRun = false;
 			IntentIntegrator.initiateScan(QRmor.this);			
-		} 
-		
-		// Button to launch the ZXing scanner
-		Button button = (Button) findViewById(com.qrmor.R.id.launchQR);
-		
-		// Starts the ZXing scanning library which sends the user into the
-		// Barcode Scanner app.
-		button.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				// Perform action on clicks
-				IntentIntegrator.initiateScan(QRmor.this);
-			}
-		});
-		
+		} 	
 	}
 	
 
@@ -114,6 +93,7 @@ public class QRmor extends Activity {
 				try {
 					GenerateAuthString();
 					
+					// Send the login authentication to the server
 					LoginAuth login = new LoginAuth(csUUID.toString(),csIMEI.toString(),csPhoneNo.toString(),csAuthCode.toString());
 					Toast.makeText(QRmor.this,"Login Sent!",Toast.LENGTH_LONG).show();
 			        SendAuth("login", csContent.toString(), login);
@@ -138,6 +118,7 @@ public class QRmor extends Activity {
 	            }
 	        }
 	        
+	        // Send the register information to the server
 	        GenerateAuthString();
 	        LoginAuth login = new LoginAuth(csUUID.toString(),csIMEI.toString(),csPhoneNo.toString(),csAuthCode.toString());
 	        RegAuth reg = new RegAuth(csUsername.toString(),csPassword.toString(),csRegCode.toString());
@@ -207,7 +188,7 @@ public class QRmor extends Activity {
 	// REGISTRATION
 	static void SendAuth(String type, RegAuth reg, LoginAuth login) {
 		HttpClient client = new DefaultHttpClient();
-		// Used for testing POST requests very handy site @
+		// Used for testing POST requests very handy site
 		// http://www.posttestserver.com/
 		// HttpPost hPost = new
 		// HttpPost("http://205.196.210.187/post.php?dir=kevin");
@@ -280,31 +261,4 @@ public class QRmor extends Activity {
 		
 		return csAuthString.toString();
 	}
-	
-	// Encrypts the parameter string (will be the Auth String) with AES
-	// encryption and returns it as a byte array.
-	static byte[] Encrypt(String newString) throws Exception{
-		System.out.println("TEST Original: " + newString);
-		KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-		keyGen.init(128);
-		
-		SecretKey sKey = keyGen.generateKey();
-		SecretKeySpec sKeySpec = new SecretKeySpec(sKey.getEncoded(),"AES");
-		
-		Cipher cipher = Cipher.getInstance("AES");
-		cipher.init(Cipher.ENCRYPT_MODE, sKeySpec);
-		
-		byte[] encString = cipher.doFinal(newString.getBytes());
-		System.out.println("TEST Encrypted: " + encString.toString());
-		
-		// Decrypt it for testing purposes. Will be removed upon release/handin
-		cipher.init(Cipher.DECRYPT_MODE, sKeySpec);
-		byte[] original = cipher.doFinal(encString);
-		
-		String output = new String(original);
-		System.out.println("TEST Decrypted: " + output);
-
-		return encString;
-	}
-
 }
